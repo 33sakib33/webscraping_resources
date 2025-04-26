@@ -1,0 +1,25 @@
+import requests
+from bs4 import BeautifulSoup
+import csv
+
+
+url = "http://quotes.toscrape.com/"
+
+response = requests.get(url)
+soup = BeautifulSoup(response.text, "html.parser")
+
+quotes = soup.find_all("div", class_="quote")
+
+with open('life_quotes_day2.csv', mode='w', newline='', encoding='utf-8') as file:
+    writer = csv.writer(file)
+    writer.writerow(['sl', 'quote', 'by whom', 'tags'])
+
+    for idx, quote in enumerate(quotes[:10], start=1):
+        text = quote.find("span", class_="text").get_text(strip=True)
+        author = quote.find("small", class_="author").get_text(strip=True)
+        tags = [tag.get_text(strip=True) for tag in quote.find_all("a", class_="tag")]
+        tags_string = ", ".join(tags)
+
+        writer.writerow([idx, text, author, tags_string])
+
+print("Done")
