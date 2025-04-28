@@ -10,7 +10,7 @@ soup = BeautifulSoup(response.text, "html.parser")
 
 quotes = soup.find_all("div", class_="quote")
 
-with open('life_quotes_day2.csv', mode='w', newline='', encoding='utf-8') as file:
+with open('life_quotes.csv', mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(['sl', 'quote', 'by whom', 'tags'])
 

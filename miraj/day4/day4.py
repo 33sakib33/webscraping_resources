@@ -2,13 +2,33 @@ from bs4 import BeautifulSoup
 import csv
 from selenium import webdriver
 import time
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 
-
-driver = webdriver.Chrome()
+chrome_options = Options()
+driver = webdriver.Chrome(options=chrome_options)
 
 url = "https://quotes.toscrape.com/scroll"
 driver.get(url)
 time.sleep(3)
+
+def scroll_until_end():
+    last_height = driver.execute_script("return document.body.scrollHeight")
+
+    while True:
+        # Scroll to the bottom
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(2)  # wait for new quotes to load
+
+        # Calculate new scroll height
+        new_height = driver.execute_script("return document.body.scrollHeight")
+
+        if new_height == last_height:
+            # No new content loaded
+            break
+        last_height = new_height
+
+scroll_until_end()
 
 soup = BeautifulSoup(driver.page_source, "html.parser")
 
@@ -21,11 +41,11 @@ for quote in quotes:
     if "life" in tags:
         life_quotes.append(quote)
 
-with open('life_quotes_day3.csv', mode='w', newline='', encoding='utf-8') as file:
+with open('life_quotes.csv', mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(['sl', 'quote', 'by whom', 'tags'])
 
-    for idx, quote in enumerate(life_quotes[:10], start=1):
+    for idx, quote in enumerate(life_quotes, start=1):
         text = quote.find("span", class_="text").get_text(strip=True)
         author = quote.find("small", class_="author").get_text(strip=True)
         tags = [tag.get_text(strip=True) for tag in quote.find_all("a", class_="tag")]
