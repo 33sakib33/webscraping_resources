@@ -2,25 +2,33 @@ from bs4 import BeautifulSoup
 import csv
 from selenium import webdriver
 import time
-from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, ElementNotInteractableException
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 chrome_options = Options()
 driver = webdriver.Chrome(options=chrome_options)
 
-# driver.get("https://quotes.toscrape.com/login")
-# time.sleep(2)
-# print("login successful")
-
-# # Fill in login credentials (demo: admin/admin)
-# driver.find_element(By.NAME, "username").send_keys("user")
-# driver.find_element(By.NAME, "password").send_keys("pass")
-# driver.find_element(By.CSS_SELECTOR, 'input[type="submit"]').click()
-# time.sleep(2)
-
 url = "https://www.udemy.com/courses/development/"
 driver.get(url)
 time.sleep(3)
+
+def click_next_until_gone(driver):
+    while True:
+        try:
+            # Wait for the button to be visible and clickable
+            next_button = WebDriverWait(driver, 5).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.ud-carousel-pager-button-next'))
+            )
+            next_button.click()
+            time.sleep(1.5)  # Allow content to load
+        except (TimeoutException, NoSuchElementException, ElementNotInteractableException):
+            print("No more Next button found. Exiting scroll.")
+            break
+
+click_next_until_gone(driver)
 
 def scroll_until_end():
     last_height = driver.execute_script("return document.body.scrollHeight")
